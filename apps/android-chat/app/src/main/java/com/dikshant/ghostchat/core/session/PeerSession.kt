@@ -133,7 +133,7 @@ class PeerSession(config: PeerConfig) {
             if (closed) return
             if (state == PeerConnection.SignalingState.STABLE && pendingNegotiation) {
                 pendingNegotiation = false
-                scope.launch { negotiate() }
+                kotlinx.coroutines.CoroutineScope(scope).launch { negotiate() }
             }
         }
 
