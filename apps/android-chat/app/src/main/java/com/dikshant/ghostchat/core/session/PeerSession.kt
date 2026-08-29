@@ -88,6 +88,7 @@ class PeerSession(config: PeerConfig) {
     private var closed = false
     private val pendingCandidates = mutableListOf<IceCandidateData>()
     private var makingOffer = false
+    private var pendingNegotiation = false
     private var restartCount = 0
     private var disconnectedTimer: kotlinx.coroutines.Job? = null
     private var pairConnectionId: String
@@ -124,7 +125,17 @@ class PeerSession(config: PeerConfig) {
     }
 
     private val observer = object : PeerConnection.Observer {
-        override fun onSignalingChange(state: PeerConnection.SignalingState?) {}
+        override fun onSignalingChange(state: PeerConnection.SignalingState?) {
+            // Renegotiation (e.g. call media added) can be requested while a
+            // previous negotiation is still in flight. When the transaction
+            // settles back to `stable`, retry any deferred negotiation so media
+            // m-lines are never silently dropped.
+            if (closed) return
+            if (state == PeerConnection.SignalingState.STABLE && pendingNegotiation) {
+                pendingNegotiation = false
+                scope.launch { negotiate() }
+            }
+        }
 
         override fun onIceConnectionChange(state: PeerConnection.IceConnectionState?) {
             onIceConnectionState()
@@ -248,7 +259,12 @@ class PeerSession(config: PeerConfig) {
 
     private suspend fun negotiate() {
         if (closed || !armed) return
-        if (makingOffer || pc.signalingState() != PeerConnection.SignalingState.STABLE) return
+        if (makingOffer || pc.signalingState() != PeerConnection.SignalingState.STABLE) {
+            // A negotiation is already in flight. Remember the request and
+            // re-run it once signaling returns to `stable` (see onSignalingChange).
+            pendingNegotiation = true
+            return
+        }
         makingOffer = true
         var offer: SessionDescription? = null
         try {
