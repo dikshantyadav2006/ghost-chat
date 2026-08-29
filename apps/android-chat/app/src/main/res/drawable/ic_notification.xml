@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome chat-bubble glyph used as the notification status icon
+     (tinted by the system / setColor at build time). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="
+            M4,3 L20,3 A3,3 0 0 1 23,6 L23,16 A3,3 0 0 1 20,19 L12.5,19 L8.1,22.5 A0.9,0.9 0 0 1 6.8,21.7 L8.2,19 L4,19 A3,3 0 0 1 1,16 L1,6 A3,3 0 0 1 4,3 Z
+            M7.2,7.8 L9.2,7.8 A0.9,0.9 0 0 1 10.1,8.7 L10.1,10.3 A0.9,0.9 0 0 1 9.2,11.2 L7.2,11.2 A0.9,0.9 0 0 1 6.3,10.3 L6.3,8.7 A0.9,0.9 0 0 1 7.2,7.8 Z
+            M11.5,7.8 L13.5,7.8 A0.9,0.9 0 0 1 14.4,8.7 L14.4,10.3 A0.9,0.9 0 0 1 13.5,11.2 L11.5,11.2 A0.9,0.9 0 0 1 10.6,10.3 L10.6,8.7 A0.9,0.9 0 0 1 11.5,7.8 Z
+            M15.8,7.8 L17.8,7.8 A0.9,0.9 0 0 1 18.7,8.7 L18.7,10.3 A0.9,0.9 0 0 1 17.8,11.2 L15.8,11.2 A0.9,0.9 0 0 1 14.9,10.3 L14.9,8.7 A0.9,0.9 0 0 1 15.8,7.8 Z" />
+</vector>
