@@ -718,6 +718,7 @@ class RoomSession(
         val stream = createLocalStream(video)
         localCallStream = stream
         AppState.setCallLocal(stream)
+        peer?.addMediaStream(stream)
         activeCallId = newId("c")
         AppState.setCall(
             CallState(
@@ -737,6 +738,7 @@ class RoomSession(
         val call = AppState.call.value ?: return
         if (call.roomId != roomId) return
         Sound.stopRingtone()
+        Notify.cancelIncomingCall()
         val stream = createLocalStream(call.video)
         localCallStream = stream
         AppState.setCallLocal(stream)
@@ -803,6 +805,7 @@ class RoomSession(
 
     private fun cleanupCall() {
         Sound.stopRingtone()
+        Notify.cancelIncomingCall()
         ringTimeout?.cancel()
         ringTimeout = null
         // Always release the camera so the next call can open it again.
@@ -1055,6 +1058,8 @@ class RoomSession(
                         peerName = peerInfo?.name ?: "",
                     ),
                 )
+                // Surface the incoming call even when the app is backgrounded.
+                Notify.notifyIncomingCall(peerInfo?.name ?: "Peer", msg.video)
                 if (Ghost.prefs.sound) Sound.playRingtone()
                 ringTimeout = CoroutineScope(SessionScope.scope).launch {
                     delay(RING_TIMEOUT_MS)

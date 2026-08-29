@@ -156,6 +156,51 @@ object Notify {
         nm.cancel(roomId.hashCode())
     }
 
+    /**
+     * Posts a high-importance incoming-call notification so a backgrounded
+     * device surfaces the ringer. Tapping it opens MainActivity, which renders
+     * the full-screen CallOverlay to accept/reject.
+     */
+    fun notifyIncomingCall(peerName: String, video: Boolean) {
+        if (!Ghost.prefs.notifications) return
+        val context = Ghost.context
+        ensureChannels(context)
+
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pending = PendingIntent.getActivity(
+            context,
+            "incoming_call".hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        val builder = NotificationCompat.Builder(context, CHANNEL_CALLS)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setColor(GhostMint.toArgb())
+            .setColorized(true)
+            .setContentTitle(peerName)
+            .setContentText(if (video) "Incoming video call…" else "Incoming voice call…")
+            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setAutoCancel(false)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOngoing(true)
+            .setContentIntent(pending)
+
+        try {
+            NotificationManagerCompat.from(context).notify("incoming_call".hashCode(), builder.build())
+        } catch (e: SecurityException) {
+            // POST_NOTIFICATIONS not granted — silent
+        }
+    }
+
+    fun cancelIncomingCall() {
+        val nm = Ghost.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        nm.cancel("incoming_call".hashCode())
+    }
+
     /** Convenience for building consistent FGS notifications. */
     fun foregroundBuilder(
         context: Context,
