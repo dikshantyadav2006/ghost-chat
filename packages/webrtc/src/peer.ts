@@ -175,6 +175,7 @@ export class PeerSession {
   private closed = false;
   private readonly pendingCandidates: IceCandidateData[] = [];
   private makingOffer = false;
+  private pendingNegotiation = false;
   private restartCount = 0;
   private disconnectedTimer: ReturnType<typeof setTimeout> | null = null;
   /**
@@ -245,6 +246,18 @@ export class PeerSession {
 
     this.pc.onconnectionstatechange = () => {
       if (this.pc.connectionState === "closed") this.onIceConnectionState();
+    };
+
+    // Renegotiation (e.g. call media added) can be requested while a previous
+    // negotiation is still in flight. When the signaling transaction settles
+    // back to `stable`, retry any negotiation that was deferred so media
+    // m-lines are never silently dropped.
+    this.pc.onsignalingstatechange = () => {
+      if (this.closed) return;
+      if (this.pc.signalingState === "stable" && this.pendingNegotiation) {
+        this.pendingNegotiation = false;
+        void this.negotiate();
+      }
     };
 
     if (config.role === "offerer") {
@@ -371,7 +384,12 @@ export class PeerSession {
   private async negotiate(): Promise<void> {
     if (this.closed) return;
     if (!this.armed) return;
-    if (this.makingOffer || this.pc.signalingState !== "stable") return;
+    if (this.makingOffer || this.pc.signalingState !== "stable") {
+      // A negotiation is already in flight. Remember the request and re-run it
+      // once signaling returns to `stable` so it is not silently lost.
+      this.pendingNegotiation = true;
+      return;
+    }
     this.log("createOffer");
     let offer: RTCSessionDescriptionInit | null = null;
     try {
