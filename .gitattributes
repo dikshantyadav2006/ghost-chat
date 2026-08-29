@@ -1,0 +1,14 @@
+* text=auto
+
+# Windows batch file
+*.bat text eol=crlf
+
+# Shell scripts keep LF
+*.sh text eol=lf
+gradlew text eol=lf
+
+# Binary files
+*.jar binary
+*.png binary
+*.webp binary
+*.ico binary
