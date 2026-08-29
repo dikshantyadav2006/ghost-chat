@@ -833,6 +833,7 @@ export class RoomSession {
     if (useApp.getState().call) throw new Error("Call already in progress");
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video });
     this.localCallStream = stream;
+    this.peer?.addMediaStream(stream);
     this.activeCallId = randomId("c");
     useApp.getState().setCall({
       roomId: this.roomId,
@@ -1124,8 +1125,9 @@ export class RoomSession {
       }
       case "accept": {
         stopRingtone();
-        const stream = this.localCallStream;
-        if (stream) this.peer?.addMediaStream(stream);
+        // The caller attached its media in `startCall`; ensure the callee's
+        // media (added in `acceptCall`) and ours are fully negotiated on both
+        // sides before we enter the active phase.
         await this.peer?.sendOffer();
         const call = useApp.getState().call;
         if (call?.roomId === this.roomId) {
