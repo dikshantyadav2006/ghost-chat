@@ -1,0 +1,31 @@
+{
+  "name": "@ghost/chat-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.cjs",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup",
+    "start": "node dist/index.cjs",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run build"
+  },
+  "dependencies": {
+    "@fastify/cors": "^10.0.1",
+    "@ghost/protocol": "workspace:*",
+    "dotenv": "^17.4.2",
+    "fastify": "^5.5.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "@repo/config-eslint": "workspace:*",
+    "@repo/config-typescript": "workspace:*",
+    "@types/node": "^24.0.0",
+    "eslint": "^9.39.0",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.2"
+  }
+}
